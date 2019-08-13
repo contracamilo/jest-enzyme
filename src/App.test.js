@@ -7,19 +7,66 @@ import App from './App';
 
 Enzyme.configure({ adapter: new EnzymeAdapter() });
 
+/**
+ * setup // function to create a ShallowWrapper for app comp.
+ * @function setup
+ * @params {object} props - Component props.
+ * @params {object} state - Initial State for setup.
+ * @returns {ShallowWrapper}
+ */
+
+const setup = (props={}, state=null) => {
+    const wrapper = shallow(<App {...props}/>); 
+    if(state) wrapper.setState(state)
+    return wrapper
+}
+
+/**.
+ * findByTestAttr // Return ShallowWrapper node(s) with the given data-test value.
+ * @param {ShallowWrapper} wrapper  - Enzyme shallow wrapper to search within.
+ * @param {string} val - Value of data-test attribute for search.
+ * @returns {ShallowWrapper}
+ */
+
+const findByTestAttr = (wrapper, val) => wrapper.find(`[data-test="${val}"]`);
+
+
+
 
 test('render without failures', () => {
-
+    const wrapper = setup();
+    const appComponent = findByTestAttr(wrapper, 'component-app');
+    expect(appComponent.length).toBe(1);
 })
-test('render incremen button', () => {
 
+test('render increment button', () => {
+    const wrapper = setup();
+    const button = findByTestAttr(wrapper, 'increment-button');
+    expect(button.length).toBe(1);
 })
+
 test('render counter display', () => {
-
+    const wrapper = setup();
+    const counterDisplay = findByTestAttr(wrapper, 'counter-display');
+    expect(counterDisplay.length).toBe(1);
 })
+
 test('counters start at 0', () => {
-
+    const wrapper = setup();
+    const initialCounterState = wrapper.state('counter');
+    expect(initialCounterState).toBe(0)
 })
-test('clicking button increments counter', () => {
 
+test('clicking button increments counter', () => {
+    const counter = 7;
+    const wrapper = setup(null, { counter });
+    
+    //find button and click
+    const button = findByTestAttr(wrapper, 'increment-button');
+    button.simulate('click')
+    wrapper.update();
+    
+    //find display and test value
+    const counterDisplay = findByTestAttr(wrapper, 'counter-display');
+    expect(counterDisplay.text()).toContain(counter + 1)
 })
